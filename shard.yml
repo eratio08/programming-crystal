@@ -1,0 +1,13 @@
+name: book
+version: 0.1.0
+
+authors:
+  - Eike Lurz <eike.lurz@tuta.io>
+
+targets:
+  book:
+    main: src/book.cr
+
+crystal: 0.34.0
+
+license: MIT

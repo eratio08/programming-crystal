@@ -80,3 +80,28 @@ p names
 w1 = "word"
 w2 = "word"
 puts w1.object_id == w2.object_id
+
+# Chapter 5
+# 3
+struct Vec2D
+  property x, y
+
+  def initialize(@x : Int32, @y : Int32)
+  end
+
+  def ==(other : self) : Bool
+    self.x == other.x && self.y == other.y
+  end
+
+  def +(other : self) : Vec2D
+    Vec2D.new(self.x + other.x, self.y + other.y)
+  end
+end
+
+vec1 = Vec2D.new(2, 2)
+vec2 = Vec2D.new(3, 3)
+
+p vec1
+p vec2
+p vec1 + vec2
+p vec1 == vec2

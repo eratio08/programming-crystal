@@ -81,6 +81,41 @@ w1 = "word"
 w2 = "word"
 puts w1.object_id == w2.object_id
 
+# Chapter 4
+# 2
+numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+numbers.fill { |i| i**3 }
+puts numbers
+
+# 4
+# Bubble Sort
+nums = [32, 74, 62, 37, 6]
+
+def buble_sort(arr : Array(Number), &block) : Array
+  loop do
+    n = arr.size
+    i = 0
+    j = 1
+    swapped = false
+    while j < n
+      n_i = arr[i]
+      n_j = arr[j]
+      if (yield(n_i, n_j))
+        arr[j] = n_i
+        arr[i] = n_j
+        swapped = true
+      end
+      i += 1
+      j += 1
+    end
+    break if !swapped
+  end
+  arr
+end
+
+puts buble_sort(nums) { |n, m| n > m }
+puts buble_sort(nums) { |n, m| n < m }
+
 # Chapter 5
 # 3
 struct Vec2D
@@ -105,3 +140,15 @@ p vec1
 p vec2
 p vec1 + vec2
 p vec1 == vec2
+
+# Chapter 5
+# 4
+class String
+  def -(other : Int)
+    "hell"
+  end
+end
+
+x = rand < 0.0001 ? 1 : "hello"
+puts x
+puts x - 1

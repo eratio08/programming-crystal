@@ -382,6 +382,157 @@ end
 
 puts t("2")
 
+# Named parameters
+def show(x, y = 1, z = 2, w = 3)
+  "x: #{x}, y: #{y}, z: #{z}, w: #{w}"
+end
+
+puts show 10
+puts show 10, 10
+puts show 10, 30, 2, 3
+puts show 10, z: 10
+
+# Splat Operator
+def salaries(*employees)
+  employees.each do |emp|
+    puts "#{emp}'s salary is: 2500"
+  end
+end
+
+salaries()
+salaries("Jones")
+salaries("Baudelaire", "Rogers", "Gandhi")
+
+def display(n, *, height, width)
+  "The shape has height #{height} and width #{width}"
+end
+
+puts display 3, height: 2, width: 5
+
+# Second named parameter
+def increment(number, by value)
+  number + value
+end
+
+p increment(10, by: 10)
+
+def join(*args, with joiner)
+  String.build do |str|
+    args.each_with_index do |arg, index|
+      str << joiner if index > 0
+      str << arg
+    end
+  end
+end
+
+puts join 1, 2, 3, with: "-"
+puts join 1, 2, 3, 4, 5, with: "*"
+
+# destructure tuple as arguments
+def add(n, m)
+  n + m
+end
+
+tpl = {42, 108}
+puts add *tpl
+
+# Yield, Proc & Blocks (yay!)
+def testing
+  puts "at top of method"
+  yield 1
+  puts "back inside method"
+  yield 2
+  puts "at end of method"
+end
+
+testing do
+  puts "in code block"
+end
+
+testing do |n|
+  puts "in code block #{n}"
+end
+
+def testing_proc(&block)
+  puts "at top of method"
+  block.call
+  puts "back inside method"
+  block.call
+  puts "at end of method"
+end
+
+testing_proc do
+  puts "in code block"
+end
+
+langs = %w(Java Go Crystal)
+langs.map { |lang| lang.upcase }
+puts langs
+
+# Lambda == Proc
+fn = ->(n : Int32, m : Int32) { n + m }
+puts typeof(fn)
+puts fn.call(42, 108)
+
+def add(n, m)
+  n + m
+end
+
+fn = ->add(Int32, Int32)
+puts fn.call(42, 108)
+
+# Proc with return type declared
+fn = Proc(Int32, Int32, Int32).new { |n, m| n + m }
+fn.call(42, 108)
+
+# Using capturing block
+def capture(&block : Int32 -> Int32)
+  block
+end
+
+n = 42
+proc = capture { |m| n + m }
+puts proc.call(108)
+n = 20
+puts proc.call(108)
+
+# Short Exception Handling Syntax
+def add_to_array(arr, number)
+  arr << number.to_i8
+rescue
+  puts "integer bigger than 255"
+end
+
+# can also be used with 'ensure'
+
+# Recursion
+def fact(n : Int) : Int
+  if n < 0
+    raise ("n cannot be negative!")
+  end
+  n == 0 ? 1 : n * fact(n - 1)
+end
+
+begin
+  fact(5)
+rescue ex
+  p ex.message
+end
+
+# exit to quit execution
+def fact(n : Int) : Int
+  if n < 0
+    puts "n must be positive!"
+    exit
+  end
+  n == 0 ? 1 : n * fact(n - 1)
+end
+
+# defensive testing
+def some_method(n : Int)
+  return nul unless n > 1
+end
+
 # Generics
 class Gen(T)
   getter name
@@ -530,3 +681,247 @@ struct User
     puts "#{age} - #{name}"
   end
 end
+
+# crystal tool hierarchy virtual.cr - to show type hierarchie
+
+# type aliasing
+alias PInt = Pointer(Int32)
+
+# Some Nice Tricks
+# Effective way to construct a string
+class Mineral
+  getter name, hardness
+
+  def initialize(@name : String, @hardness : Float64)
+  end
+
+  # Good
+  def to_s(io)
+    io << name << ", " << hardness
+  end
+end
+
+min1 = Mineral.new("gold", 42.0)
+io = IO::Memory.new
+s = min1.to_s(io).to_s
+puts typeof(s)
+puts s
+
+# Exception Class
+class CoolException < Exception
+end
+
+# raise CoolException.new("Somebody pushed the red button")
+
+ex = begin
+  raise CoolException.new
+rescue ex1 : IndexError
+  ex1.message
+rescue ex2 : CoolException | KeyError
+  ex2.message
+rescue ex3 : Exception
+  ex3.message
+rescue
+  "an unknown exception"
+end
+
+# Callbacks
+class MineralC
+  def initialize
+    @callbacks = [] of ->
+  end
+
+  def after_save(&block)
+    @callbacks << block
+  end
+
+  def save
+    # save
+    puts "Saving..."
+  rescue ex
+    p "Exception occured: #{ex.message}"
+  else
+    @callbacks.each &.call
+  end
+end
+
+min = MineralC.new
+min.after_save { puts "Save in DB successful" }
+min.after_save { puts "Logging save" }
+min.after_save { puts "Replicate save a failover node" }
+min.save
+
+# Modules
+module Crystals
+  class Rhombic
+  end
+
+  class Tricilin
+  end
+end
+
+t = Crystals::Rhombic.new
+puts typeof(Crystals)
+
+module Trig
+  PI = 3.141592654
+
+  def self.sin(x)
+    puts "Calculating the sin of #{x}"
+  end
+
+  def self.cos(x)
+    # ...
+  end
+end
+
+# Modules can extend them self to ommit self. prefix
+module Moral
+  extend self
+  VERY_BAD = 0
+  BAD      = 1
+
+  def sin(badness)
+    puts "Assesing the sin of #{badness}"
+  end
+end
+
+# load modules by using 'require'
+# flatten included module by using 'include'
+
+# Mixin in Modules with include
+
+class Basic
+  def initialize(@name : String)
+  end
+
+  def to_s
+    @name
+  end
+end
+
+module Debug
+  def who_am_i?
+    "#{self.class.name} (\##{self.object_id}): #{self.to_s}"
+  end
+end
+
+class DVD < Basic
+  include Debug
+end
+
+class BlueRay < Basic
+  include Debug
+end
+
+dv = DVD.new("West End Blues")
+br = BlueRay.new("Attack of the Martians")
+puts dv.who_am_i?
+puts br.who_am_i?
+
+# Use module methods on the class level 'extend' is used
+module DebugC
+  def who_am_i?
+    "#{self.class.name}: #{self.to_s}"
+  end
+end
+
+class CD < Basic
+  extend DebugC
+end
+
+cd = CD.new("Bach's Cello Suites")
+puts cd.who_am_i?
+puts CD.who_am_i?
+
+# Classes can include and extend multiple modules
+
+# Each class (type) has an anchestor list (parent classes)
+# (a class -> super class -> ... -> objects)
+
+# To avoid the diamond problem included modules take precedence
+module M1
+  def meth1
+    41
+  end
+end
+
+class C1
+  def meth1
+    42
+  end
+end
+
+class D1 < C1
+  include M1
+end
+
+class E1 < D1
+end
+
+puts E1.new.meth1
+
+# Build in Modules
+
+# Comparable
+class Person
+  include Comparable(Person)
+
+  getter name, age
+
+  def initialize(@name : String, @age : UInt8)
+  end
+
+  def <=>(other : self)
+    # if self.age < other.age
+    #   -1 # <
+    # elsif self.age > other.age
+    #   1 # >
+    # else
+    #   0 # ==
+    # end
+    self.age <=> other.age
+  end
+end
+
+# Enumerable
+class Sequence
+  include Enumerable(Int32)
+
+  def initialize(@top : Int32)
+  end
+
+  def each
+    0.upto(@top) { |num| yield num }
+  end
+end
+
+seq = Sequence.new(7)
+puts seq.to_a
+puts seq.select &.even?
+puts seq.map { |x| x**2 }
+
+# Interators for lazyness
+n = 0
+inc = Iterator.of {
+  n += 1
+  n
+}
+
+puts inc.next
+puts inc.next
+puts inc.next
+
+n = 1
+m = 1
+fib = Iterator.of {
+  ret = n
+  n = m
+  m += ret
+  ret
+}
+
+puts fib
+  .select { |x| x.even? }
+  .first(10)
+  .to_a
